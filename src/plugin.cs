@@ -1,5 +1,4 @@
-﻿using Nautilus.Commands;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace org.efool.subnautica.seaglide_sprint {
 
@@ -22,12 +21,16 @@ public class Plugin : BepInEx.BaseUnityPlugin
 [Nautilus.Options.Attributes.Menu(Info.title)]
 public class ConfigGlobal : Nautilus.Json.ConfigFile
 {
-	[Nautilus.Options.Attributes.Slider("Seaglide Sprint multiplier", 1.0f, 10.0f, Step = 0.05f, DefaultValue = 1.0f, Format = "{0:F2}")]
+	[Nautilus.Options.Attributes.Slider("Seaglide Sprint Addition", 0.0f, 20.0f, Step = 0.05f, DefaultValue = 0.0f, Format = "{0:F2}", Tooltip="Additive speed boost when sprinting with seaglide. Base swim speed is 6.64. Seaglide speed is 25.")]
+	public float seaglideSprintAddition = 0.0f;
+
+	[Nautilus.Options.Attributes.Slider("Seaglide Sprint Multiplier", 1.0f, 10.0f, Step = 0.05f, DefaultValue = 2.0f, Format = "{0:F2}", Tooltip="Multiplicative speed boost on final speed when sprinting.")]
 	public float seaglideSprintMultiplier = 2.0f;
 }
 
 public static class Commands
 {
+	[Nautilus.Commands.ConsoleCommand("seaglide_sprint_addition")] public static void seaglide_sprint_addition(float x) { Plugin.config.seaglideSprintAddition = x; }
 	[Nautilus.Commands.ConsoleCommand("seaglide_sprint_multiplier")] public static void seaglide_sprint_multiplier(float x) { Plugin.config.seaglideSprintMultiplier = x; }
 }
 
@@ -110,8 +113,7 @@ static class Patch
 		if ( Inventory.main.equipment.GetTechTypeInSlot("Body") == TechType.ReinforcedDiveSuit )
 			speed = Mathf.Max(2f, speed - 1f);
 
-		bool seaglideActive = Player.main.motorMode == Player.MotorMode.Seaglide;
-		if ( !seaglideActive ) {
+		if ( Player.main.motorMode != Player.MotorMode.Seaglide ) {
 			switch ( Inventory.main.equipment.GetTechTypeInSlot("Foots") ) {
 			case TechType.Fins          : speed += 1.9f; break;
 			case TechType.UltraGlideFins: speed += 3.2f; break;
@@ -120,12 +122,18 @@ static class Patch
 			if ( Inventory.main.GetHeldTool() != null )
 				--speed;
 		}
+		
+		if ( GameInput.GetIsRunning() ) {
+			// Player.main.motorMode seems to always be Dive instead of Seaglide
+			var held = Inventory.main.GetHeld();
+			if ( held != null && held.gameObject.GetComponent<Seaglide>() != null ) {
+				speed += Plugin.config.seaglideSprintAddition;
+				speed *= Plugin.config.seaglideSprintMultiplier;
+			}
+		}
 
 		if ( (double)__instance.gameObject.transform.position.y > (double)Player.main.GetWaterLevel() )
 			speed *= 1.3f;
-
-		if ( GameInput.GetIsRunning() )
-			speed *= Plugin.config.seaglideSprintMultiplier;
 
 		___currentPlayerSpeedMultipler = Mathf.MoveTowards(___currentPlayerSpeedMultipler, __instance.playerSpeedModifier, 0.3f * Time.deltaTime);
 		__result = speed * ___currentPlayerSpeedMultipler;

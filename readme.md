@@ -3,7 +3,7 @@
 Use sprint button while using the seaglide for a speed boost.
 
 - Does not consume extra charge
-- Speed multiplier configurable
+- Speed boost configurable
 
 # Requirements
 
@@ -27,6 +27,11 @@ Note: `[game]` is the directory containing `Subnautica.exe`
 
 # Console Commands
 
-| Description                | Command                    |
-| -------------------------- | -------------------------- |
-| Seaglide sprint multiplier | seaglide_sprint_multiplier |
+| Description                            | Command                    |
+| -------------------------------------- | -------------------------- |
+| Seaglide sprint boost flat addition    | seaglide_sprint_addition   |
+| Seaglide sprint boost final multiplier | seaglide_sprint_multiplier |
+
+# Known Issues
+
+- Speed boost is uniform in all directions, unlike all other speeds
