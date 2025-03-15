@@ -25,6 +25,6 @@ public static class Info
 	public const string name = "efool-seaglide-sprint";
 	public const string title = "efool's Seaglide Sprint";
 	public const string desc = "efool's seaglide sprint mod for Subnautica";
-	public const string version = "0.0.1";
+	public const string version = "0.0.3";
 }
 }
