@@ -49,16 +49,16 @@ static class Patch
 		ItemsContainer container = main.container;
 		switch (equipment.GetTechTypeInSlot("Tank"))
 		{
-			case TechType.Tank:
+		case TechType.Tank:
 			num1 -= 0.425f;
 			break;
-			case TechType.DoubleTank:
+		case TechType.DoubleTank:
 			num1 -= 0.5f;
 			break;
-			case TechType.PlasteelTank:
+		case TechType.PlasteelTank:
 			num1 -= 0.10625f;
 			break;
-			case TechType.HighCapacityTank:
+		case TechType.HighCapacityTank:
 			num1 -= 0.6375f;
 			break;
 		}
@@ -106,13 +106,14 @@ static class Patch
 		}
 
 		int count = Inventory.main.container.GetCount(TechType.HighCapacityTank);
-		speed = speed - (float)count * 1.275f;
-		if ( (double)speed < 2.0 )
-			speed = 2f;
+		speed -= count * 1.275f;
+		if ( speed < 2.0f )
+			speed = 2.0f;
 
 		if ( Inventory.main.equipment.GetTechTypeInSlot("Body") == TechType.ReinforcedDiveSuit )
-			speed = Mathf.Max(2f, speed - 1f);
+			speed = Mathf.Max(2.0f, speed - 1.0f);
 
+		// Player.main.motorMode seems to always be Dive instead of Seaglide
 		if ( Player.main.motorMode != Player.MotorMode.Seaglide ) {
 			switch ( Inventory.main.equipment.GetTechTypeInSlot("Foots") ) {
 			case TechType.Fins          : speed += 1.9f; break;
@@ -122,17 +123,19 @@ static class Patch
 			if ( Inventory.main.GetHeldTool() != null )
 				--speed;
 		}
-		
-		if ( GameInput.GetIsRunning() ) {
-			// Player.main.motorMode seems to always be Dive instead of Seaglide
-			var held = Inventory.main.GetHeld();
-			if ( held != null && held.gameObject.GetComponent<Seaglide>() != null ) {
+
+		var held = Inventory.main.GetHeld();
+		if ( held != null ) {
+			if ( GameInput.IsRunning && held.gameObject.GetComponent<Seaglide>() != null ) {
 				speed += Plugin.config.seaglideSprintAddition;
 				speed *= Plugin.config.seaglideSprintMultiplier;
 			}
+			else if ( held.GetComponent<PlayerTool>() != null ) {
+				speed -= 1.0f;
+			}
 		}
 
-		if ( (double)__instance.gameObject.transform.position.y > (double)Player.main.GetWaterLevel() )
+		if ( __instance.gameObject.transform.position.y > Player.main.GetWaterLevel() )
 			speed *= 1.3f;
 
 		___currentPlayerSpeedMultipler = Mathf.MoveTowards(___currentPlayerSpeedMultipler, __instance.playerSpeedModifier, 0.3f * Time.deltaTime);
