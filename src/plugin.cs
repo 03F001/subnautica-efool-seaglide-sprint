@@ -14,6 +14,7 @@ public class Plugin : BepInEx.BaseUnityPlugin
 	private void Awake()
 	{
 		config = Nautilus.Handlers.OptionsPanelHandler.RegisterModOptions<ConfigGlobal>();
+		Nautilus.Handlers.ConsoleCommandsHandler.RegisterConsoleCommands(typeof(Commands));
 		new HarmonyLib.Harmony(org.efool.subnautica.seaglide_sprint.Info.FQN).PatchAll();
 	}
 }
